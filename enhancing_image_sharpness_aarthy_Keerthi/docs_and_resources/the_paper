@@ -1,0 +1,1070 @@
+Arabian Journal for Science and Engineering
+https://doi.org/10.1007/s13369-025-10469-3
+RESEARCH ARTICLE-COMPUTER ENGINEERING AND COMPUTER SCIENCE
+Enhancing Image Sharpness by Modified Unsharp Masking Using
+Coefficient Bounds Obtained for a Subclass of Analytic Functions
+B. Aarthy1 · B. Srutha Keerthi1
+Received: 13 November 2024 / Accepted: 4 July 2025
+© King Fahd University of Petroleum & Minerals 2025
+Abstract
+Image sharpening is a fundamental technique in image processing used to enhance the clarity and detail of images by improving
+edge contrast. Traditional sharpening methods often introduce artifacts and noise, particularly in low-contrast regions. In this
+paper, we propose a new approach to image sharpening based on coefficient bounds obtained for a subclass of Sakaguchi-
+type analytic functions subordinate to the generating function of Gregory coefficients. We derive the initial coefficients and
+incorporate these bounds as adaptive sharpening factors in a modified unsharp masking framework. The proposed method
+effectively enhances edge definition while preserving the natural appearance of smoother regions. To validate its performance,
+we apply the technique to various benchmark datasets, including CSIQ, LIVE, TID2013, and KADID 10k, and evaluate
+sharpness improvement using Pearson linear correlation coefficient and Spearman’s rank ordered correlation coefficient. This
+study highlights the potential of geometric function theory in advancing image processing techniques and opens new avenues
+for interdisciplinary research in mathematical imaging.
+Keywords Analytic function · Gregory coefficients · Unsharp masking · Image sharpening
+1 Introduction
+Geometric function theory (GFT) can be quite powerful in
+image processing, especially for tasks that involve shape
+analysis, image registration, and feature extraction. The Rie-
+mann mapping theorem is a fundamental result in complex
+analysis that states every simply connected, non-empty open
+subset of the complex plane can be mapped conformally
+onto the open unit disk. This theorem has several appli-
+cations in image processing due to its powerful geometric
+properties. Geometric function theory provides a rich math-
+ematical framework that enhances various aspects of image
+processing, from feature extraction and enhancement to sig-
+nal processing and pattern recognition. Its applications help
+develop sophisticated algorithms that improve the efficiency
+and effectiveness of image analysis techniques (see [1–3]).
+B B. Srutha Keerthi
+sruthakeerthi.b@vit.ac.in ; keerthivitmaths@gmail.com
+B. Aarthy
+aarthy.b2021@vitstudent.ac.in ; aarthybalaji28@gmail.com
+1
+Department of Mathematics, School of Advanced Sciences,
+Vellore Institute of Technology, Chennai 600127, India
+Sharpening refers to methods that are useful for improv-
+ing intensity transitions in digital images. The perception
+of boundaries in images is influenced by changes in inten-
+sity, the sharper the image, the more smoothly the intensity
+transitions occur. The clarity of the texture and borders of
+different specific areas of an image is referred to as image
+sharpness. This quality has an impact on how informa-
+tion is interpreted, how images are acquired, and how they
+are processed afterward, particularly in certain applications
+that require high-quality images. The majority of traditional
+methods for evaluating image sharpness rely on spectral or
+spatial domains. The primary means of evaluating an image
+in the spatial domain is to extract its edge and gradient
+information. These methods have the benefit of being highly
+performant in real time and requiring minimal computational
+work, but they are also susceptible to noise. To extract image
+frequency information for sharpness evaluation, the spec-
+tral domain methods primarily use transformation techniques
+like wavelet transform and Fourier transform. Although this
+kind of approach has a significant computational cost, it
+offers outstanding sensitivity. Deep learning techniques have
+replaced machine learning techniques as the most popular
+learning-based approaches in recent years. When two or more
+single evaluation techniques are combined in a specific way,
+123Arabian Journal for Science and Engineering
+a new method known as a combination method is created.
+These techniques efficiently increase the accuracy of quality
+evaluation by combining the benefits of a single method. In
+order to make visuals sharper, one frequent technique used
+in graphics is called unsharp masking.
+In image processing, unsharp masking is a commonly
+used method for sharpening images by boosting contrast
+along edges and finer details. Unsharp masking, despite its
+name, operates by removing a blurry copy of the original
+image from the original itself. By increasing the contrast
+along edges, this procedure gives an appearance that the
+edges are sharper. Unsharp masking is a nonlinear method
+in digital image processing that can be used on color or
+grayscale images. Although it is a strong technique, it needs
+to be applied with caution to prevent adding noise or arti-
+facts to the image. In digital photography, satellite imaging,
+microscopy, and other fields where image sharpness is crit-
+ical, unsharp masking is frequently employed. Traditional
+sharpening methods such as high-pass filtering and unsharp
+masking enhances the contrast of the images but can also add
+noise and artifacts. This promotes the need for a more math-
+ematically grounded approach to image enhancement that
+balances edge sharpness while preserving smooth regions.
+The primary motivation behind our approach is the incor-
+poration of a thorough mathematical framework into image
+processing, which results in a sharpening technique that:
+• Minimizes Artifacts: Our approach guarantees a regu-
+lated enhancement of edges, in contrast to traditional
+sharpening techniques that may overshoot and result in
+halo effects.
+• Preserves Image Structure: The coefficient bounds offer
+a natural method of adjusting sharpening intensity while
+preserving smooth transitions in areas with low contrast.
+• Bridges Theory and Application: With its potential for
+practical uses like image enhancement, this work expands
+the impact of GFT beyond theoretical research.
+Image sharpening is a crucial technique in various real-
+world applications, including medical imaging, satellite
+image analysis, surveillance, and digital photography. In
+medical imaging, precise edge enhancement is essential for
+accurate diagnosis, whereas in satellite and remote sensing
+applications, sharpening improves the detection of geograph-
+ical features. Autonomous vehicles and surveillance systems
+rely on real-time image enhancement for object detection, yet
+computational efficiency is critical. In document processing
+and Optical Character Recognition (OCR), sharpening aids
+in enhancing text clarity, improving recognition accuracy for
+scanned documents. To address these challenges, this study
+introduces a mathematically rigorous, deterministic sharp-
+ening framework based on GFT and Gregory coefficients,
+123
+offering a computationally efficient, interpretable alternative
+that enhances edge clarity while preserving smooth regions.
+The rest of the article is organized as follows: Sec-
+tion 2 discusses prior research and methods related to image
+sharpening techniques. Section 3 defines the mathematical
+concepts including function classes and coefficient bounds.
+Section 4 explains the image sharpening approach using
+modified unsharp masking based on the obtained coeffi-
+cient bounds. Section 5 evaluates the proposed method with
+datasets and assessment metrics.
+2 Related Works
+This section reviews existing sharpening techniques, focus-
+ing on both classical and modern methods. It highlights the
+limitations of conventional approaches and the need for a
+more mathematically grounded sharpening framework, such
+as the proposed method leveraging geometric function theory
+and coefficient bounds from analytic functions.
+In [4], Bae et. al. determined the Dicrete Cosine Trans-
+form (DCT) domain’s weighted average L 2 norm, whereas
+in [5], Bae et. al. also employed DCT blocks to analyze
+local image characteristics and the qualities of how various
+kinds of distortion are perceived in terms of visual quality
+and structural contrast indices. In [6], Gao et. al. proposed
+a method where the image is represented as a block using a
+dictionary, and the sparse coefficient is used to calculate the
+block’s energy. The pooling layer then normalizes the energy
+of the block to provide a sharpness evaluation score. In [7], to
+express image localization, a multi-scale spatial max-pooling
+approach is devised by Lu et. al., and structural information
+is extracted via Sparse Representation (SR). In [8], Zhang
+et. al. obtained the saliency maps using Scale-Invariant Fea-
+ture Transform (SIFT), and shape information is obtained
+by converting the blocks that compute the gradient maps to
+DCT coefficients. In [9], Zhan et. al. suggested a method
+where the distribution of various structural alterations and
+the degree of structural variations are used to describe the
+quality of an image. In [10], Bahrami et. al. determined the
+maximum gradient of the image and change in the gradi-
+ent. In [11], Gvozden et. al. analyzed the image’s root mean
+square to understand more about the local contrast. In [12],
+Bianco et. al. proposed a method which is based on gener-
+ating generic image descriptions using features taken from
+pre-trained Convolutional Neural Networks (CNNs). In [13],
+He et. al. used the image’s numerous characteristics as input,
+end-to-end training is used to determine the feature weights
+in order to produce evaluations. In [14], Li et. al. extracted
+the features using the pre-trained Deep Convolutional Neu-
+ral Network (DCNN) model, and quality prediction is largely
+achieved by using least squares regression following feature
+aggregation. In [15], Zhang et. al. used two convolutionalArabian Journal for Science and Engineering
+neural networks to extract features from distorted images,
+while bilinear pooling is used to predict quality. In [16], Baig
+et. al. determined the image derivatives and DFT based on
+blocks.
+In [17], Yang et. al. suggest the RVSIM (Riesz trans-
+form and visual contrast sensitivity-based feature SIMilarity
+index) FR-IQA (full-reference image quality assessment)
+approach, which combines visual contrast sensitivity with
+Riesz transform. By utilizing CSF to distribute the weights
+of various frequency bands, RVSIM fully utilizes the Log-
+Gabor filter and MS theory. In [18], Reisenhofer et. al.
+proposed a Haar wavelet-based perceptual similarity index
+(HaarPSI), a new and computationally inexpensive metric
+that produces FR picture quality evaluations is presented.
+The HaarPSI uses low-frequency Haar wavelet coefficients
+to weight the significance of (dis)similarities at certain points
+in the image domain and high-frequency Haar wavelet coeffi-
+cient magnitudes to identify local similarities. In [19], Jia et.
+al. calculated weighted standard deviations of the local con-
+trast quality map and the global visual saliency (VS) quality
+map to produce the final score of the CVSS metric, which is
+based on the similarity of contrast and VS. In [20], Temel et.
+al. introduced SUMMER, an algorithm for evaluating image
+quality that is based on the spectral understanding of multi-
+scale and multi-channel error representations. Also, in [21],
+Temel et. al. introduced a low-level spatiochromatic-model-
+based similarity method (BLeSS), inspired by biology, to
+support full-reference image quality estimators that initially
+oversimplify color perception processes. In [22], Nafchi et.
+al. utilized the image gradient as the primary feature to com-
+pute the first similarity map, which is subject to structural
+deviations. A chromaticity similarity map is then used to
+quantify color distortions. A suggested deviation pooling
+technique combines and pools these similarity maps.
+Many existing sharpening techniques, including unsharp
+masking, high-pass filtering, and advanced edge-preserving
+methods, often lead to noise amplification and artifacts,
+especially in low-contrast or smooth regions of an image.
+This challenge is particularly evident in HDR and low-light
+images, where variations in contrast and noise levels make
+sharpening difficult. Since most sharpening methods are not
+content-aware, they tend to overenhance certain areas unnec-
+essarily, resulting in unnatural image distortions. In fields
+such as satellite imaging and medical imaging, an intel-
+ligent sharpening technique that can differentiate between
+textured and smooth regions would be highly beneficial. Our
+proposed approach, which refines unsharp masking using
+coefficient bounds, addresses these challenges by selectively
+sharpening the necessary regions while maintaining the nat-
+ural appearance of smoother areas. This method minimizes
+oversharpening and prevents excessive noise introduction.
+The motivation for this work arises from the limitations
+of traditional sharpening methods. While unsharp masking
+and high-pass filtering effectively enhance edges, they often
+cause overshooting effects and amplify noise, leading to
+visual artifacts. Wavelet-based methods offer better control
+but are computationally expensive, and deep learning-based
+approaches, though adaptive, require extensive training data
+and high computational resources, making them unsuitable
+for real-time applications. To overcome these issues, we
+propose a novel sharpening framework based on geomet-
+ric function theory. By utilizing the coefficient bounds of
+the function class ST (, t, λ), our method ensures adap-
+tive edge enhancement while suppressing noise in smooth
+regions. This approach effectively integrates theoretical func-
+tion analysis with practical image processing, offering a
+controlled sharpening mechanism that improves image clar-
+ity without introducing excessive artifacts.
+3 Mathematical Framework
+Let D be the open unit disk defined by D = {ξ ∈ C : |ξ | <
+1}. Let A be the set of all functions normalized under the
+conditions f(0) = f (0) − 1 = 0 which are analytic and has
+the Taylor series expansion,
+f(ξ ) = ξ +
+∞
+
+an ξ n , ξ ∈ D.
+(1)
+n=2
+Let S be the subclass of A which consists of functions that
+are univalent in D. We say that an analytic function f(ξ )
+is subordinate to another analytic function h(ξ ), denoted as
+f(ξ ) ≺ h(ξ ), if there exists a Schwarz function ω(ξ ) with the
+conditions,
+ω(0) = 0 and |ω(ξ )| < 1, ξ ∈ D
+(2)
+such that,
+f(ξ ) = h(ω(ξ )).
+(3)
+Furthermore, if h(ξ ) is univalent in D, then f(0) = h(0) and
+h(D) ⊂ f (D).
+It is widely known that every function f(ξ ) ∈ S has an
+inverse f−1 (ξ ) defined by,
+f−1 (f(ξ )) = ξ, ξ ∈ D
+(4)
+and
+f(f−1 (w)) = w, |w| < r0 (f), r0 (f) ≥
+1
+.
+4
+(5)
+Given that f−1 has an analytic continuation to D, if both f and
+f−1 are univalent in D, then the function f is bi-univalent in
+123Arabian Journal for Science and Engineering
+D. The bi-univalent function is represented by,
+g(w) = f−1 (w) = w − a2 w 2 + (2a22 − a3 )w 3
+−(5a22 − 5a2 a3 + a4 )w 4 + · · ·
+(6)
+Some functions including,
+
+1+ξ
+1
+ξ
+log
+, log
+,
+1−ξ
+1−ξ 1−ξ
+belong to to the class of bi-univalent functions . The famous
+Koebe function does not belong to the class  along with
+other functions,
+ξ−
+ξ2
+ξ
+.
+,
+2 1 − ξ2
+In 1967, Lewin [23] investigated the class  and provided
+the result |a2 | < 1.51. Thereafter,
+√ Brannan, David, and Clu-
+nie [24] presumed that |a2 | < 2. Finding the coefficient
+estimates |an | for n ≥ 3 for the Taylor Maclaurin series is
+still a conjecture. Ma and Minda [25] unified different classes
+of starlike and convex functions where either of the quantities
+ξ f (ξ )
+ξ f (ξ )
+f(ξ ) or 1 + f (ξ ) is subordinate to a more general analytic
+function φ ∈ P with the conditions φ(0) = 1 and φ  (0) > 0
+and φ maps D onto a region starlike with respect to 1 and
+symmetric with respect to the real axis. They introduced the
+following classes of functions:
+Sφ∗ =
+
+
+ξ f (ξ )
+≺ φ(ξ ) (ξ ∈ D)
+f∈A:
+f(ξ )
+(7)
+and
+
+
+ξ f (ξ )
+Cφ = f ∈ A : 1 + 
+≺ φ(ξ ) (ξ ∈ D)
+f (ξ )
+Lemma 1 [38] If p ∈ P has the form p(ξ ) = 1 + c1 ξ +
+c2 ξ 2 + · · · , ξ ∈ D, then,
+(8)
+which are considered as the most essential subclasses of star-
+)
+like and convex functions where φ(ξ ) = (1+ξ
+(1−ξ ) . Many results
+have been obtained regarding the functions of the class  (see
+[26–32]).
+Consider the Maclaurin series,
+G(ξ ) =
+1
+ξ
+1
+1
+= 1 + ξ − ξ2 + ξ3
+log(1 + ξ )
+2
+12
+24
+19 4
+3 5
+863 6
+ξ +
+ξ −
+ξ + ···
+−
+720
+160
+60480
+∞
+
+=1+
+n ξ n , ξ ∈ D
+(9)
+n=1
+where n are called the Gregory coefficients or reciprocal
+logarithmic numbers or Bernoulli numbers of the second
+kind or Cauchy numbers of the first kind (see [33, 34]).
+123
+Figure 1 gives the graphical representation of the generat-
+ing function of G(ξ ). Gregory coefficients arise in numerical
+analysis, particularly in the Gregory series, which improves
+numerical integration and summation methods by incorpo-
+rating higher-order corrections. These coefficients appear
+in the Gregory quadrature formula, refining the trapezoidal
+rule by adding terms derived from finite differences. They
+play a crucial role in the Euler-Maclaurin formula, which
+bridges discrete summation and continuous integration using
+Bernoulli numbers. By adjusting approximations, Gregory
+coefficients enhance numerical integration, finite difference
+methods, and asymptotic series expansions, making them
+essential in computational mathematics.
+In [35], Murugusundaramoorthy et. al. considered three
+subclasses of analytic bi-univalent functions subordinate to
+the generating function of Gregory coefficients and obtained
+the initial coefficient bounds |a2 | and |a3 | along with the
+Fekete Szego inequality. Also, in [36], Murugusundaramoor-
+thy et. al. considered the class of starlike functions subordi-
+nate to Gregory coefficients and obtained the bound |an | for
+n = 2, 3, 4, 5, 6 inclusive of the logarithmic and inverse
+coefficient bounds for the same class. In [37], Srivastava
+et. al. obtained the first five sharp coefficient bounds for
+the class of convex functions subordinate to the generating
+function of the Gregory coefficients. Motivated by the afore-
+mentioned results, in this paper, we introduce a new subclass
+of Sakaguchi-type analytic functions subordinate to the gen-
+erating function whose coefficients are Gregory numbers n .
+Let P represent the set of all functions p(ξ ) which are
+analytic in the open unit disk D such that p(ξ ) takes the
+value 1 at ξ = 0 and the real part of p remains positive, i.e.,
+Re{ p(ξ )} > 0.
+|cn | ≤ 2, n ≥ 1,
+(10)
+and this inequality is sharp for each n ∈ N.
+The above lemma is famously known as the Carathéodory
+lemma (see [38–40]). In geometric function theory,
+Carathéodory’s lemma is used to study functions subordi-
+nate to analytic functions with positive real parts. It plays a
+role in proving coefficient bounds, distortion theorems, and
+growth estimates for subclasses of univalent and close-to-
+convex functions.
+Definition 1 A function f(ξ ) ∈  is said to be in the class
+ST (, t, λ) if it satisfies the following subordination:
+(1 − t)[λξ 2 f (ξ ) + ξ f (ξ )]
+≺ G(ξ )
+f(ξ ) − f(tξ )
+(1 − t)[λw2 g  (w) + wg  (w)]
+≺ G(w)
+g(w) − g(tw)
+(11)
+(12)Arabian Journal for Science and Engineering
+Fig. 1 Image of unit disk in w− plane by G(ξ )
+where the function g(w) = f−1 (w) is defined in (6).Thus,
+Theorem 1 Let f(ξ ) ∈ ST (, t, λ) and has the form 1,
+thenυ(ξ ) =
+
+|a2 | ≤
+3
+(13)
+|2{3u 22 − 3u 3 − 6u 2 (1 + λ) + 9(1 + 2λ) + 7[2(1 + λ) − u 2 ]2 }|
+and
+|a3 | ≤
+
+
+m2 ξ 2
+m1
+ξ + m2 − 1
+2
+2
+2
+1
+1
++
+2
+4[2(1 + λ) − u 2 ]
+2[3(1 + 2λ) − u 3 ]
+(14)
+
+
+m 31 ξ 3
++ · · · , ξ ∈ D,
++ m3 − m1m2 +
+4
+2
+(18)
+which gives
+n
+where u n = 1−t
+1−t .
+Proof Since f(ξ ) ∈ ST (, t, λ), by the definition of subor-
+dination, there exists a Schwarz function υ(ξ ) analytic with
+the conditions υ(0) = 0 and |υ(ξ )| < 1, such that,
+(1 − t)[λξ 2 f (ξ ) + ξ f (ξ )]
+= G(υ(ξ )), ξ ∈ D,
+f(ξ ) − f(tξ )
+(15)
+and a function τ (w) analytic with the conditions τ (0) = 0
+and |τ (w)| < 1, such that,
+(1 − t)[λw 2 g  (w) + wg  (w)]
+g(w) − g(tw)
+= G(τ (w)), w ∈ D.
+G(υ(ξ )) = 1 +
++
+1
+(17m 31 − 56m 1 m 2 + 48m 3 )ξ 3 + · · ·
+192
+(19)
+From Equations (15) and (19),
+(1 − t)[λξ 2 f (ξ ) + ξ f (ξ )]
+m1
+=1+
+ξ
+f(ξ ) − f(tξ )
+4
+1
++ (−7m 21 + 12m 2 )ξ 2 + · · ·
+48
+(20)
+(16)
+Similarly, define a Carathéodory function τ (w) ∈ P by,
+Now, define a Carathéodory function p(ξ ) ∈ P by,
+p(ξ ) =
+m1
+1
+ξ + (−7m 21 + 12m 2 )ξ 2
+4
+48
+1 + υ(ξ )
+= 1 + m 1 ξ + m 2 ξ 2 + · · · , ξ ∈ D. (17)
+1 − υ(ξ )
+q(w) =
+1 + τ (w)
+= 1 + n 1 w + n 2 w 2 + · · · , w ∈ D.
+1 − τ (w)
+(21)
+123Arabian Journal for Science and Engineering
+from which we obtain
+
+
+n 2 w2
+n1
+τ (w) = w + n 2 − 1
+2
+2
+2
+
+ 3
+3
+n w
++ n3 − n1n2 + 1
++ · · · , w ∈ D.
+4 2
+Moreover, on subtracting (28) from (26),
+a3 = a22 +
+(22)
+G(τ (w)) = 1 +
++
+1
+n1
+w + (−7n 21 + 12n 2 )w 2
+4
+48
+1
+(17n 31 − 56n 1 n 2 + 48n 3 )w 3 + · · ·
+192
+1
+1
++
+2
+4[2(1 + λ) − u 2 ]
+2[3(1 + 2λ) − u 3 ]
+(34)
+The proof of our theorem is now complete.
+(23)
+4 Proposed Work
+From Eqs. (16) and (23),
+(1 − t)[λw2 g  (w) + wg  (w)]
+n1
+=1+ w
+g(w) − g(tw)
+4
+1
+2
+2
++ (−7n 1 + 12n 2 )w + · · ·
+48
+(33)
+Substituting (25) in the place of a22 and applying Lemma 1,
+|a3 | ≤
+Then,
+1
+(m 2 − n 2 )
+8[3(1 + 2λ) − u 3 ]
+(24)
+This section provides a detailed explanation of the unsharp
+masking process used to sharpen blurred images, utilizing the
+coefficients derived for the class ST (, t, λ) as presented
+in Theorem 1.
+4.1 Unsharp Masking
+Comparing the coefficients,
+m1
+4
+2
+2
+[u 2 − 2u 2 (1 + λ)]a2 + [3(1 + 2λ) − u 3 ]a3
+1
+=
+(−7m 21 + 12m 2 )
+48
+n1
+−[2(1 + λ) − u 2 ]a2 =
+4
+[u 22 − 2u 3 − 2u 2 (1 + λ) + 6(1 + 2λ)]a22
+1
++[u 3 − 3(1 + 2λ)]a3 =
+(−7n 21 + 12n 2 )
+48
+[2(1 + λ) − u 2 ]a2 =
+(25)
+(26)
+(27)
+(28)
+From (25) and (27),
+m 1 = −n 1
+(29)
+and
+m 21 + n 21 = 32a22 [2(1 + λ) − u 2 ]2
+Unsharp masking typically involves two main steps. First, the
+original image is smoothed using a high-pass filter to extract
+an edge image, also referred to as a mask. In the second
+step, this edge image is added to the blurred version of the
+original image to enhance sharpness. Figure 2 illustrates the
+flowchart of the proposed methodology, where (−) denotes
+the subtraction of the smoothed image from the original to
+obtain the edge image, (∗) signifies the application of the
+sharpness factor (coefficient bounds) to adjust the enhance-
+ment, and (+) represents the addition of the edge image to
+the blurred image, resulting in the final sharpened output.
+The coefficient bounds obtained from (32) and (34) for
+different values of t and λ are experimented with the images
+to attain maximum sharpening of the images. Based on exper-
+imental results, the best balance was observed at t = 0.6 and
+λ = 0, where the sharpening effect was strong enough to
+enhance edges but without causing excessive artifacts.
+(30)
+Adding (26) and (28) and substituting (30),
+a22 =
+3(m 2 + n 2 )
+2
+8{3u 2 − 3u 3 − 6u 2 (1 + λ) + 9(1 + 2λ) + 7[2(1 + λ) − u 2 ]2 }
+(31)
+By using triangle inequality and Lemma 1,
+
+|a2 | ≤
+3
+|2{3u 22 − 3u 3 − 6u 2 (1 + λ) + 9(1 + 2λ) + 7[2(1 + λ) − u 2 ]2 }|
+123
+(32)Arabian Journal for Science and Engineering
+Fig. 2 Flowchart of the
+proposed methodology
+4.2 Gaussian Filter
+A Gaussian filter is used in image processing to smooth
+images by reducing detail and noise. The image is con-
+volved using a Gaussian function, which is a bell-shaped,
+symmetric curve. This filter is frequently used to denoize,
+blur, and prepare images for additional processing, includ-
+ing edge detection. The Gaussian function used in the filter
+is given by:
+
+G(x, y) =
+1
+e
+2π σ 2
+−
+altering key features. The Gaussian filter balances efficiency,
+noise reduction, and edge preservation, making it perfect for
+a variety of applications, even if advanced filters, such as the
+bilateral filter, can preserve edges more successfully.
+4.3 Methodology
+The following is the procedure for the image sharpening tech-
+nique proposed in this manuscript:
+
+x 2 +y 2
+2σ 2
+(35)
+where (x, y) are coordinates of a pixel, and σ is the stan-
+dard deviation of the Gaussian distribution. The width of the
+Gaussian kernel (the filter matrix) and the degree of blurring
+depend on the value of σ , higher values produce more blur-
+ring. The Gaussian filter kernel is applied to the image by
+convolving it with each pixel. Each pixel value in the image
+is replaced by a weighted average of its surrounding pixels,
+with the weights determined by the Gaussian function. This
+process smooths out high-frequency variations in the image.
+Its bell-curve distribution, which gives central pixels a higher
+weight than those on the filter kernel’s boundaries, allows it to
+gently reduce random (Gaussian) noise without significantly
+(1) Read the blurred and original images from the dataset.
+(2) Apply Gaussian filter to the original image for smoothing
+the image.
+(3) Subtract the original and smoothed images to obtain the
+edge image.
+(4) To enhance sharpening, convolute the coefficient bounds
+obtained from Equations 32 and 34 to each of the pixels
+in the image to enhance the contrast of the edges obtained
+in the previous step for different values of t and λ.
+(5) Now, the sharpened image is obtained by adding the edge
+image with the blurry image.
+(6) Repeat steps (4) and (5) for various values of t and λ to
+find the effective results.
+(7) Obtain the metrics PLCC and SROCC for the optimal
+values of t = 0.6 and λ = 0.
+123Arabian Journal for Science and Engineering
+Fig. 3 Sample images from
+CSIQ dataset
+Fig. 4 Sample images from
+LIVE dataset
+Fig. 5 Sample images from
+TID2013 dataset
+4.4 Public Datasets and Assessment Metrics
+The datasets that are most frequently utilized in the field
+include categorical subjective image quality (CSIQ) [41],
+Laboratory for Image and Video Engineer (LIVE) [42] and
+Tampere Image Database (TID2013) [43]. The CSIQ dataset
+consists of 30 reference images and 150 distorted images at
+5 different levels of blur with ‘.png’ extension. The LIVE
+dataset and the TID2013 dataset each consists of 25 refer-
+ence images and 125 distorted images at 5 different levels of
+blur with ‘.bmp’ extension. We have also included the Kon-
+stanz Artificially Distorted Image quality Database (KADID
+10k) [44, 45] which consists of 81 reference images and 405
+Fig. 6 Sample images from
+KADID 10k dataset
+123
+distorted images at 5 different levels of blur with ‘.png’ exten-
+sion.
+When evaluating an image’s sharpness, an algorithm’s
+evaluation result is compared against a human’s subjective
+judgment to see whether it meets the necessary require-
+ments. This is done using the sharpness performance eval-
+uation indicators. The sharpness performance evaluation
+indicators that are most frequently utilized include the root
+mean square error (RMSE), Kendall rank order correlation
+coefficient (KROCC), Pearson linear correlation coefficient
+(PLCC), and Spearman’s rank ordered correlation coefficient
+(SROCC). Current sharpening metrics focus primarily on
+edge enhancement, but lack alignment with human percep-
+tion of image quality. Research on perceptual image qualityArabian Journal for Science and Engineering
+Fig. 7 Sharpening of various images from CSIQ dataset at different blur levels
+123Arabian Journal for Science and Engineering
+Fig. 8 Sharpening of various images from LIVE dataset at different blur levels
+assessment metrics tailored to sharpened images is an emerg-
+ing area that could help improve algorithm evaluation and
+development.
+The correlation between the algorithm evaluation value
+and the human subjective score is expressed by the Pearson
+linear correlation coefficient (PLCC). Equation (36) illus-
+trates its primary application in accuracy calculation.
+
+
+η 
+βi − β̄
+1  αi − ᾱ
+P LCC =
+η−1
+σα
+σβ
+i=1
+123
+(36)Arabian Journal for Science and Engineering
+Fig. 9 Sharpening of various images from TID2013 dataset at different blur levels
+where ᾱ and β̄ are the means of αi and βi , respectively, and
+σα and σβ are the corresponding standard deviations of αi
+and βi .
+The monotonicity of algorithm prediction is primarily
+assessed using Spearman’s rank ordered correlation coeffi-
+cient (SROCC) as given in equation (37).
+η
+S R OCC = 1 −
+
+1
+(γxi − γ yi )2
+2
+η(η − 1)
+(37)
+i=1
+where the sorting locations of xi and yi in each of the cor-
+responding data sequences are denoted by γxi and γ yi .
+In this paper, we have selected the metrics PLCC and
+SROCC to compare the proposed methods with other meth-
+ods in the literature.
+5 Experimental Results and Analysis
+The proposed image sharpening method utilizing unsharp
+masking was evaluated through a systematic analysis of its
+effectiveness in enhancing image quality. The analysis aimed
+to quantify improvements in sharpness and detail across
+various types of images, employing both visual assessment
+and quantitative metrics, including Pearson linear correlation
+coefficient (PLCC) and Spearman’s rank ordered correlation
+coefficient (SROCC).
+To observe the performance of the proposed method,
+PLCC and SROCC are employed. The experimental results
+presented in Table 1 and Table 2 were obtained from the
+cited references, and the same datasets were used for testing
+each comparative method group [46]. The experiments for
+the proposed method are done using MATLAB online.
+123Arabian Journal for Science and Engineering
+Fig. 10 Sharpening of various images from KADID 10k dataset at different blur levels
+5.1 Subjective Assessment
+In image processing, subjective or visual assessment is the
+process of analyzing processed images directly to deter-
+mine their efficacy and quality. When human perception is
+essential to the image’s structure, this kind of evaluation is
+essential to make sure the final visual output satisfies intended
+objectives. Visual evaluation is frequently employed in con-
+junction with quantitative measurements, particularly in
+fields like photography, medical imaging, and remote sensing
+where subjective judgment is crucial.
+Figures 3, 4, 5 and 6 represent the sample images from
+the CSIQ, LIVE, TID2013 and KADID 10k datasets, respec-
+tively. Figures 7, 8, 9 and 10 represent the sharpening of the
+sample images from the aforementioned datasets at different
+levels of blur. In each of the images, rows I, III and V rep-
+123
+resent the blurred images starting from the highest blur level
+at (a). Rows II, IV and VI represents the sharpened images
+corresponding to the respective blur levels.
+Applying our sharpening method results in notable improve-
+ments in visual clarity. The images have more detail, which
+improves overall quality and makes the features easier to
+detect. The coefficient bounds obtained for the defined class
+ST (, t, λ) ensure that the sharpened image does not over-
+shoot or produce unnaturally exaggerated details. They help
+maintain smooth gradients in intensity, which is crucial for
+natural edge enhancement.
+5.2 Objective Assessment
+In image processing, objective or quantitative evaluation is
+crucial for evaluating and comparing the efficacy, perfor-Arabian Journal for Science and Engineering
+Table 1 Comparison of PLCC
+and SROCC of the proposed
+method with other methods
+Method
+LIVE
+CSIQ
+TID2013
+PLCCSROCCPLCCSROCCPLCCDCT-QM [4]0.9250.9380.8720.9260.8520.854
+SC-QI [5]0.9370.9480.9270.9430.9070.905
+SPARISH [6]0.9560.9590.9380.9140.9000.893
+SR [7]0.9610.9550.9500.9210.8990.892
+RFSV [8]0.9740.9710.9420.9200.9240.932
+SVC [9]0.9490.9410.9520.9540.8570.787
+MGV [10]0.9600.9630.9070.9500.9140.921
+BISHARP [11]0.9520.9600.9420.9270.8920.896
+DeepBIQ [12]0.9120.8930.9750.9670.9200.922
+MSFF [13]0.9490.950––0.9170.922
+SFA [14]0.9420.953––0.9540.948
+DB-CNN [15]0.9700.9680.9590.9460.8650.816
+FISH [16]0.9040.8410.9230.8940.9110.912
+Proposed0.9450.9450.9520.9510.8880.900
+mance, and quality of various image processing methods and
+algorithms. Quantitative evaluation offers objective, repro-
+ducible metrics that are particularly helpful in fields like
+computer vision, medical imaging, and photography where
+accurate measurements of image quality are essential, in
+contrast to qualitative (visual) evaluations that depend on
+subjective judgment.
+Table 1 presents the average PLCC and SROCC values
+for the proposed method, along with a comparative analysis
+against other image sharpening algorithms from the litera-
+ture. Since utilizing coefficient bounds from the subclass of
+analytic functions ST (, t, λ) subordinate to the gener-
+ating function of Gregory coefficients is still an emerging
+approach, our method achieves correlation metrics closer to
+1. Given that correlation values range from −1 (negative cor-
+relation) to +1 (positive correlation), with 0 indicating no
+correlation, achieving values near +1 is a desirable outcome
+for a novel technique like the one proposed. Additionally,
+Table 2 provides a comparison of the average PLCC and
+SROCC values for the proposed method against existing
+techniques in the literature for the KADID 10k dataset.
+From Figures 7, 8, 9, and 10, it is evident that the proposed
+method, which utilizes coefficient bounds as sharpening fac-
+tors in unsharp masking, yields effective results. While other
+state-of-the-art techniques also demonstrate strong perfor-
+mance, this study highlights the proposed approach due to
+its foundation in geometric function theory, a developing
+strategy in image processing. Overall, incorporating coef-
+ficient bounds in image sharpening presents a promising
+avenue for enhancing image quality across various applica-
+tions, including digital photography, medical imaging, and
+video processing.
+SROCC
+Table 2 Comparison of PLCC and SROCC for KADID 10k dataset
+MethodPLCCSROCC
+BLeSS [21]0.7800.952
+CVSS [19]0.8840.957
+HaarPSI [18]0.9080.952
+MDSI [22]0.9480.950
+RVSIM [17]0.9410.939
+SUMMER [20]0.8640.950
+Proposed0.9150.910
+5.3 Discussion
+The experimental results, evaluated using Pearson lin-
+ear correlation coefficient (PLCC) and Spearman’s rank
+ordered correlation coefficient (SROCC), demonstrate that
+our proposed method achieves competitive performance in
+sharpening quality across multiple benchmark datasets. The
+proposed method applies sharpening in a controlled manner
+preserving fine details without causing over enhancement.
+The observed correlation metrics confirm that the pro-
+posed technique competes well with state-of-the-art sharp-
+ening algorithms. Unlike traditional unsharp masking, which
+applies a uniform sharpening factor, our approach adapts
+sharpening intensity using coefficient bounds derived from
+geometric function theory, ensuring a balance between edge
+enhancement and noise suppression.
+5.4 Limitation
+One limitation observed is that for images with extremely
+high blur levels, although the sharpening effect is notice-
+123Arabian Journal for Science and Engineering
+able, slight hazing can appear in the output, particularly
+in texture-rich regions. This may explain the marginally
+lower PLCC and SROCC values compared to some state-
+of-the-art learning-based methods. Furthermore, the discrete
+nature of digital images introduces challenges when applying
+continuous mathematical function theory, requiring careful
+numerical implementation.
+6 Conclusion
+Unsharp masking is a simple yet effective method for
+improving image sharpness. The image appears sharper by
+enhancing edges and minute details by eliminating a blurry
+version of the image from the original image. But extreme
+caution must be taken to prevent oversharpening, which can
+result in artifacts and a loss of natural appearance. Due to
+its simplicity of usage and efficiency in enhancing image
+quality, unsharp masking is extensively employed in a vari-
+ety of applications, such as digital image processing, medical
+imaging, and photography. In this article, a modified unsharp
+masking using coefficient bounds obtained for a subclass
+of analytic functions subordinate to Gregory coefficients is
+utilized for improving the sharpness of the image. Future
+research will examine how to improve this technique even
+further and apply it in new applications, potentially expand-
+ing its advantages to other fields where image quality is
+crucial.
+Acknowledgements The authors sincerely thank the editor and the
+anonymous reviewers for their valuable comments and suggestions to
+improve the article in its present form.
+Author Contributions All authors have jointly worked and agreed for
+the manuscript.
+Funding No fund was received for this article.
+Data Availability The following links are provided to download the
+datasets used for this study.
+Link for CSIQ dataset.
+Link for LIVE dataset.
+Link for TID2013 dataset
+Link for KADID 10k dataset
+Declarations
+Conflict of interest The authors declare no Conflict of interest.
+References
+1. Aarthy, B.; Keerthi, B.S.: Enhancement of various images using
+coefficients obtained from a class of Sakaguchi type functions.
+Sci. Rep. 13(1), 18722 (2023)
+2. Nithiyanandham, E.K.; Srutha Keerthi, B.: A new proposed model
+for image enhancement using the coefficients obtained by a sub-
+123
+class of the Sakaguchi-type function. Signal, Image Video Process.
+18(2), 1455–1462 (2024)
+3. Sundari, K.S.; Keerthi, B.S.: Enhancing the quality of low-
+light images via the coefficient bounds derived for a subclass
+of Sakaguchi-type function. EURASIP J. Image Video Process.
+2025(1), 4 (2025)
+4. Bae, S.H.; Kim, M.: DCT-QM: A DCT-based quality degradation
+metric for image quality optimization problems. IEEE Trans. Image
+Process. 25(10), 4916–4930 (2016)
+5. Bae, Sung-Ho.; Kim, Munchurl: A novel image quality assessment
+with globally and locally consilient visual quality perception. IEEE
+Trans. Image Process. 25(5), 2392–2406 (2016)
+6. Gao, F.; Jun, Y.; Zhu, S.; Huang, Q.; Tian, Q.: Blind image quality
+prediction by exploiting multi-level deep representations. Pattern
+Recognit. 81, 432–442 (2018)
+7. Qingbo, L.; Zhou, W.; Li, H.: A no-reference image sharpness
+metric based on structural information using sparse representation.
+Inf. Sci. 369, 334–346 (2016)
+8. Zhang, S.; Li, P.; Xianghua, X.; Li, L.; Chang, C.C.: No-reference
+image blur assessment based on response function of singular val-
+ues. Symmetry 10(8), 304 (2018)
+9. Zhan, Y.; Zhang, R.; Qian, W.: A structural variation classification
+model for image quality assessment. IEEE Trans. Multimed. 19(8),
+1837–1847 (2017)
+10. Bahrami, K.; Kot, A.C.: A fast approach for no-reference image
+sharpness assessment based on maximum local variation. IEEE
+Signal Process. Lett. 21(6), 751–755 (2014)
+11. Gvozden, G.; Grgic, S.; Grgic, M.: Blind image sharpness assess-
+ment based on local contrast map statistics. J. Vis. Commun. Image
+Represent. 50, 145–158 (2018)
+12. Bianco, S.; Celona, L.; Napoletano, P.; Schettini, R.: On the use
+of deep learning for blind image quality assessment. Signal, Image
+Video Process. 12, 355–362 (2018)
+13. He, S.; Liu, Z.: Image quality assessment based on adaptive mul-
+tiple skyline query. Signal Process.: Image Commun. 80, 115676
+(2020)
+14. Li, D.; Jiang, T.; Lin, W.; Jiang, M.: Which has better visual quality:
+The clear blue sky or a blurry animal? IEEE Trans. Multimed. 21(5),
+1221–1234 (2018)
+15. Zhang, W.; Ma, K.; Yan, J.; Deng, D.; Wang, Z.: Blind image quality
+assessment using a deep bilinear convolutional neural network.
+IEEE Trans. Circuits Syst. Video Technol. 30(1), 36–47 (2018)
+16. Baig, Md..A.; Moinuddin, A.A.; Khan, E.; Ghanbari, M.: DFT-
+based no-reference quality assessment of blurred images. Mul-
+timed. Tools Appl. 81(6), 7895–7916 (2022)
+17. Yang, G.; Li, D.; Fan, L.; Liao, Y.; Yang, W.: RVSIM: a fea-
+ture similarity method for full-reference image quality assessment.
+EURASIP J. Image Video Process. 1–15, 2018 (2018)
+18. Reisenhofer, R.; Bosse, S.; Kutyniok, G.; Wiegand, T.: A Haar
+wavelet-based perceptual similarity index for image quality assess-
+ment. Signal Process.: Image Commun. 61, 33–43 (2018)
+19. Jia, H.; Zhang, L.; Wang, T.: Contrast and visual saliency similarity-
+induced index for assessing image quality. IEEE Access 6, 65885–
+65893 (2018)
+20. Temel, D.; AlRegib, G.: Perceptual image quality assessment
+through spectral analysis of error representations. Signal Process.:
+Image Commun. 70, 37–46 (2019)
+21. Temel, D.; AlRegib, G.: BLeSS: bio-inspired low-level spatiochro-
+matic similarity assisted image quality assessment. In: 2016 IEEE
+International Conference on Multimedia and Expo (ICME), pp.
+1–6. IEEE (2016)
+22. Nafchi, H.Z.; Shahkolaei, A.; Hedjam, R.; Cheriet, M.: Mean devi-
+ation similarity index: efficient and reliable full-reference image
+quality evaluator. IEEE Access 4, 5579–5590 (2016)
+23. Lewin, M.: On a coefficient problem for bi-univalent functions.
+Proc. Am. Math. Soc. 18(1), 63–68 (1967)Arabian Journal for Science and Engineering
+24. Brannan, D.A.; Clunie, J. et al. Aspects of contemporary complex
+analysis (1980)
+25. Ma, W.: A unified treatment of some special classes of univalent
+functions. In: Proceedings of the Conference on Complex Analysis,
+1992. International Press Inc. (1992)
+26. Srivastava, H.M.; Eker, S.S.; Ali, R.M.: Coefficient bounds for a
+certain class of analytic and bi-univalent functions. Filomat 29(8),
+1839–1843 (2015)
+27. Frasin, B.A.; Aouf, M.K.: New subclasses of bi-univalent func-
+tions. Appl. Math. Lett. 24(9), 1569–1573 (2011)
+28. Murugusundaramoorthy, G.; Magesh, N.; Prameela, V.; et al. Coef-
+ficient bounds for certain subclasses of bi-univalent function. In:
+Abstract and Applied Analysis, vol 2013. Hindawi (2013)
+29. Adegani, E.A.; Jafari, M.; Bulboacă, T.; Zaprawa, P.: Coefficient
+bounds for some families of bi-univalent functions with missing
+coefficients. Axioms 12(12), 1071 (2023)
+30. Al-Rawashdeh, W.: Coefficient bounds of a class of bi-univalent
+functions related to Gegenbauer polynomials. Int. J. Math. Comput.
+Sci. 19(3), 635–642 (2024)
+31. Sharma, P.; Sivasubramanian, S.; Cho, N.E.: Initial coefficient
+bounds for certain new subclasses of bi-univalent functions with
+bounded boundary rotation. AIMS Math 8, 29535–29554 (2023)
+32. Khan, B.; Srivastava, H.M.; Tahir, M.; Darus, M.; Ahmad, Q.Z.;
+Khan, N.: Applications of a certain q-integral operator to the
+subclasses of analytic and bi-univalent functions. AIMS Math 6,
+1024–1039 (2021)
+33. Phillips, G.M.: Gregory’s method for numerical integration. Am.
+Math. Mon. 79(3), 270–274 (1972)
+34. Berezin, I.S.; Zhidkov, N.P.: Computing Methods: Adiwes Inter-
+national Series in the Engineering Sciences, vol 1. Elsevier (2014)
+35. Murugusundaramoorthy, G.; Vijaya, K.; Bulboacă, T.: Initial
+coefficient bounds for bi-univalent functions related to Gregory
+coefficients. Mathematics 11(13), 2857 (2023)
+36. Kazımoğlu, S.; Deniz, E.; Srivastava, H.M.: Sharp coefficients
+bounds for starlike functions associated with Gregory coefficients.
+Complex Anal. Op. Theory 18(1), 6 (2024)
+37. Srivastava, H.M.; Cho, N.E.; Alderremy, A.A.; Lupas, A.A.; Mah-
+moud, E.E.: Khan, Shahid: Sharp inequalities for a class of novel
+convex functions associated with Gregory polynomials. J. Inequal.
+Appl. 2024(1), 140 (2024)
+38. Carathéodory, C.: Über den variabilitätsbereich der koeffizienten
+von potenzreihen, die gegebene werte nicht annehmen. Math. Ann.
+64(1), 95–115 (1907)
+39. Pommerenke, C.: Univalent functions. Vandenhoeck and Ruprecht
+(1975)
+40. Duren, P.L.: Univalent functions, vol 259. Springer Science & Busi-
+ness Media (2001)
+41. Larson, E.C.; Chandler, D.M.: Most apparent distortion: full-
+reference image quality assessment and the role of strategy. J.
+Electron. Imaging 19(1), 011006–011006 (2010)
+42. Sheikh, H.R.; Sabir, M.F.; Bovik, A.C.: A statistical evaluation of
+recent full reference image quality assessment algorithms. IEEE
+Trans. Image Process. 15(11), 3440–3451 (2006)
+43. Ponomarenko, N.; Jin, L.; Ieremeiev, O.; Lukin, V.; Egiazarian, K.;
+Astola, J.; Vozel, B.; Chehdi, K.; Carli, M.; Battisti, F., et al.: Image
+database tid2013: Peculiarities, results and perspectives. Signal
+Process.: Image Commun. 30, 57–77 (2015)
+44. Lin, H.; Hosu, V.; Saupe, D.: KADID-10k: a large-scale artificially
+distorted IQA database. In: 2019 10th International Conference
+on Quality of Multimedia Experience (QoMEX), pp. 1–3. IEEE
+(2019)
+45. Lin, H.; Hosu, V.; Saupe, D.: DEEPFL-IQA: weak supervision
+for deep IQA feature learning. arXiv preprint arXiv:2001.08113,
+(2020)
+46. Mengqiu, Z.; Lingjie, Y.; Wang, Z.; Ke, Z.; Zhi, C.: A survey on
+objective evaluation of image sharpness. Appl. Sci. 13(2), 2652
+(2023)
+Springer Nature or its licensor (e.g. a society or other partner) holds
+exclusive rights to this article under a publishing agreement with the
+author(s) or other rightsholder(s); author self-archiving of the accepted
+manuscript version of this article is solely governed by the terms of such
+publishing agreement and applicable law.
+123

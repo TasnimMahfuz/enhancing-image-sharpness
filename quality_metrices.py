@@ -18,3 +18,6 @@ def mae(original, enhanced):
 
     return np.mean(np.abs(original - enhanced))
 
+def psnr(original, enhanced, max_pixel_value = 255.0):
+
+    m = mse()
