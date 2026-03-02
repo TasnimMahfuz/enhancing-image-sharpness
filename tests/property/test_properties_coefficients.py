@@ -175,9 +175,11 @@ class TestEnhanceProperties:
     @settings(max_examples=50)
     def test_enhance_preserves_dimensions(self, t, lambda_param, height, width):
         """
-        Property: Enhancement should preserve image dimensions.
+        Feature: image-sharpness-enhancement
+        Property 15: Enhancement Preserves Dimensions
         
-        For any edge image, enhanced image should have same shape.
+        For any edge image, the enhanced edge image should have the same dimensions.
+        Validates: Requirements 5.3
         """
         enhancer = CoefficientEnhancer(t=t, lambda_param=lambda_param, omega=1.0)
         edge_image = np.random.randn(height, width).astype(np.float32)
@@ -196,9 +198,13 @@ class TestEnhanceProperties:
     @settings(max_examples=50)
     def test_enhance_preserves_sign_with_positive_coefficient(self, t, lambda_param, height, width):
         """
-        Property: Enhancement with positive coefficient preserves sign.
+        Feature: image-sharpness-enhancement
+        Property 16: Enhancement Preserves Sign
         
-        If coefficient > 0, positive values stay positive, negative stay negative.
+        For any edge image and positive coefficient, if a pixel value is positive 
+        (or negative) in the edge image, it should remain positive (or negative) 
+        in the enhanced edge image.
+        Validates: Requirements 5.4
         """
         enhancer = CoefficientEnhancer(t=t, lambda_param=lambda_param, omega=1.0)
         
@@ -229,9 +235,12 @@ class TestEnhanceProperties:
     @settings(max_examples=50)
     def test_enhance_is_uniform_scaling(self, t, lambda_param, height, width):
         """
-        Property: Enhancement should be uniform scaling by a2_bound.
+        Feature: image-sharpness-enhancement
+        Property 14: Edge Enhancement is Uniform Scaling
         
-        enhanced = edge * a2_bound at every pixel.
+        For any edge image and coefficient bound, the enhanced edge image should 
+        equal the edge image multiplied by the coefficient at every pixel.
+        Validates: Requirements 5.1, 5.2
         """
         enhancer = CoefficientEnhancer(t=t, lambda_param=lambda_param, omega=1.0)
         edge_image = np.random.randn(height, width).astype(np.float32)
