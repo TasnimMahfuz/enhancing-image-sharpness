@@ -63,7 +63,7 @@ class GaussianFilter:
             return convolve(image, self.kernel, mode='reflect')
         elif image.ndim == 3:
             # Color image - apply to each channel independently
-            smoothed = np.zeros_like(image, dtype=np.float32)
+            smoothed = np.zeros_like(image, dtype=image.dtype)
             for c in range(image.shape[2]):
                 smoothed[:, :, c] = convolve(image[:, :, c], self.kernel, mode='reflect')
             return smoothed
