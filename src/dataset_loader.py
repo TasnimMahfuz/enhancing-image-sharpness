@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 
 from src.data_models import ImagePair
+from src.exceptions import FileLoadError, ValidationError
 
 
 class DatasetLoader:
@@ -31,12 +32,12 @@ class DatasetLoader:
         """
         # Check if files exist
         if not os.path.exists(reference_path):
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"Reference image file not found: {reference_path}"
             )
         
         if not os.path.exists(distorted_path):
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"Distorted image file not found: {distorted_path}"
             )
         
@@ -46,14 +47,14 @@ class DatasetLoader:
             reference = np.array(ref_img)
             
             if reference.size == 0:
-                raise IOError(
+                raise FileLoadError(
                     f"Loaded reference image is empty: {reference_path}"
                 )
             
         except Exception as e:
-            if isinstance(e, (FileNotFoundError, IOError)):
+            if isinstance(e, FileLoadError):
                 raise
-            raise IOError(
+            raise FileLoadError(
                 f"Failed to load reference image {reference_path}: {str(e)}"
             )
         
@@ -63,14 +64,14 @@ class DatasetLoader:
             distorted = np.array(dist_img)
             
             if distorted.size == 0:
-                raise IOError(
+                raise FileLoadError(
                     f"Loaded distorted image is empty: {distorted_path}"
                 )
             
         except Exception as e:
-            if isinstance(e, (FileNotFoundError, IOError)):
+            if isinstance(e, FileLoadError):
                 raise
-            raise IOError(
+            raise FileLoadError(
                 f"Failed to load distorted image {distorted_path}: {str(e)}"
             )
         
@@ -97,13 +98,13 @@ class DatasetLoader:
             ValueError: If dataset_name is not supported
         """
         if dataset_name not in self.SUPPORTED_DATASETS:
-            raise ValueError(
+            raise ValidationError(
                 f"Unsupported dataset: {dataset_name}. "
                 f"Supported datasets: {self.SUPPORTED_DATASETS}"
             )
         
         if not os.path.exists(dataset_path):
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"Dataset path not found: {dataset_path}"
             )
         
@@ -118,9 +119,9 @@ class DatasetLoader:
             elif dataset_name == 'KADID10k':
                 return self.load_kadid10k_dataset(dataset_path)
         except Exception as e:
-            if isinstance(e, (FileNotFoundError, ValueError)):
+            if isinstance(e, (FileLoadError, ValidationError)):
                 raise
-            raise IOError(
+            raise FileLoadError(
                 f"Failed to load {dataset_name} dataset from {dataset_path}: {str(e)}"
             )
     
@@ -146,12 +147,12 @@ class DatasetLoader:
         dst_dir = dataset_path / 'dst_imgs'
         
         if not src_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"CSIQ source directory not found: {src_dir}"
             )
         
         if not dst_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"CSIQ distorted directory not found: {dst_dir}"
             )
         
@@ -169,7 +170,7 @@ class DatasetLoader:
                     try:
                         pair = self.load_image_pair(str(ref_path), str(dist_path))
                         pairs.append(pair)
-                    except (FileNotFoundError, IOError) as e:
+                    except FileLoadError as e:
                         # Log warning but continue
                         print(f"Warning: Skipping pair due to error: {e}")
                         continue
@@ -196,7 +197,7 @@ class DatasetLoader:
         ref_dir = dataset_path / 'refimgs'
         
         if not ref_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"LIVE reference directory not found: {ref_dir}"
             )
         
@@ -226,7 +227,7 @@ class DatasetLoader:
                             pair = self.load_image_pair(str(ref_path), str(dist_path))
                             pairs.append(pair)
                             break
-                        except (FileNotFoundError, IOError) as e:
+                        except FileLoadError as e:
                             print(f"Warning: Skipping pair due to error: {e}")
                             continue
         
@@ -253,12 +254,12 @@ class DatasetLoader:
         dist_dir = dataset_path / 'distorted_images'
         
         if not ref_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"TID2013 reference directory not found: {ref_dir}"
             )
         
         if not dist_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"TID2013 distorted directory not found: {dist_dir}"
             )
         
@@ -281,7 +282,7 @@ class DatasetLoader:
                     try:
                         pair = self.load_image_pair(str(ref_path), str(dist_path))
                         pairs.append(pair)
-                    except (FileNotFoundError, IOError) as e:
+                    except FileLoadError as e:
                         print(f"Warning: Skipping pair due to error: {e}")
                         continue
         
@@ -308,7 +309,7 @@ class DatasetLoader:
         images_dir = dataset_path / 'images'
         
         if not images_dir.exists():
-            raise FileNotFoundError(
+            raise FileLoadError(
                 f"KADID-10k images directory not found: {images_dir}"
             )
         
@@ -327,7 +328,7 @@ class DatasetLoader:
                     try:
                         pair = self.load_image_pair(str(ref_path), str(dist_path))
                         pairs.append(pair)
-                    except (FileNotFoundError, IOError) as e:
+                    except FileLoadError as e:
                         print(f"Warning: Skipping pair due to error: {e}")
                         continue
         

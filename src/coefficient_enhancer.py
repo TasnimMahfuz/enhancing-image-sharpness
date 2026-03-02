@@ -7,6 +7,7 @@ to enhance edge contrast in images.
 """
 
 import numpy as np
+from src.exceptions import ValidationError, NumericalError
 
 
 class CoefficientEnhancer:
@@ -34,7 +35,7 @@ class CoefficientEnhancer:
         """
         # Validate t parameter
         if not 0 <= t <= 1:
-            raise ValueError(
+            raise ValidationError(
                 f"Parameter t must be in [0, 1], got {t}. "
                 f"Valid range: 0 ≤ t ≤ 1"
             )
@@ -42,7 +43,7 @@ class CoefficientEnhancer:
         # Check for t ≈ 1 (causes division by zero)
         EPSILON = 1e-10
         if abs(1 - t) < EPSILON:
-            raise ValueError(
+            raise ValidationError(
                 f"Parameter t too close to 1 (t={t}). "
                 f"This causes division by zero in u_n calculation."
             )
@@ -82,8 +83,9 @@ class CoefficientEnhancer:
         
         # Check for numerical issues
         if not np.isfinite(result):
-            raise ValueError(
-                f"Non-finite value in u_n calculation: {result}"
+            raise NumericalError(
+                f"Non-finite value in u_n calculation: {result}. "
+                f"Parameters: n={n}, t={self.t}, omega={self.omega}"
             )
         
         return result
@@ -131,8 +133,33 @@ class CoefficientEnhancer:
             
         Returns:
             Enhanced edge image with same shape as input
+            
+        Raises:
+            ValidationError: If edge_image is not a valid numpy array
+            NumericalError: If enhancement produces non-finite values
         """
+        # Validate input
+        if not isinstance(edge_image, np.ndarray):
+            raise ValidationError(
+                f"edge_image must be a numpy array, got {type(edge_image)}"
+            )
+        
+        if edge_image.size == 0:
+            raise ValidationError(
+                "edge_image is empty (size 0)"
+            )
+        
         # Use a2_bound as primary enhancement factor
         enhanced_edge = edge_image * self.a2_bound
+        
+        # Check for numerical issues
+        if not np.all(np.isfinite(enhanced_edge)):
+            nan_count = np.sum(np.isnan(enhanced_edge))
+            inf_count = np.sum(np.isinf(enhanced_edge))
+            raise NumericalError(
+                f"Enhancement produced non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}. "
+                f"a2_bound: {self.a2_bound}, edge_image range: [{np.min(edge_image)}, {np.max(edge_image)}]"
+            )
         
         return enhanced_edge

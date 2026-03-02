@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy.ndimage import convolve
+from src.exceptions import ValidationError, ProcessingError, NumericalError
 
 
 class GaussianFilter:
@@ -13,12 +14,24 @@ class GaussianFilter:
         
         Args:
             sigma: Standard deviation of Gaussian distribution (σ > 0)
+            
+        Raises:
+            ValidationError: If sigma is not positive
         """
         if sigma <= 0:
-            raise ValueError(f"sigma must be positive, got {sigma}")
+            raise ValidationError(
+                f"Gaussian sigma must be positive, got {sigma}. "
+                f"Valid range: σ > 0"
+            )
         
         self.sigma = sigma
-        self.kernel = self._create_kernel()
+        
+        try:
+            self.kernel = self._create_kernel()
+        except Exception as e:
+            raise ProcessingError(
+                f"Failed to create Gaussian kernel with sigma={sigma}: {str(e)}"
+            )
     
     def _create_kernel(self) -> np.ndarray:
         """
@@ -28,6 +41,9 @@ class GaussianFilter:
         
         Returns:
             2D numpy array with normalized Gaussian kernel
+            
+        Raises:
+            NumericalError: If kernel contains non-finite values
         """
         # Kernel size to capture 99.7% of distribution (±3σ)
         radius = int(np.ceil(3 * self.sigma))
@@ -43,8 +59,22 @@ class GaussianFilter:
         exponent = -(X**2 + Y**2) / (2 * self.sigma**2)
         kernel = coefficient * np.exp(exponent)
         
+        # Check for numerical issues
+        if not np.all(np.isfinite(kernel)):
+            raise NumericalError(
+                f"Gaussian kernel contains non-finite values. "
+                f"sigma={self.sigma}, kernel_size={kernel_size}"
+            )
+        
         # Normalize so sum equals 1.0
-        kernel = kernel / np.sum(kernel)
+        kernel_sum = np.sum(kernel)
+        if kernel_sum < 1e-10:
+            raise NumericalError(
+                f"Gaussian kernel sum too small: {kernel_sum}. "
+                f"sigma={self.sigma}"
+            )
+        
+        kernel = kernel / kernel_sum
         
         return kernel
     

@@ -9,6 +9,7 @@ from hypothesis import given, strategies as st, settings
 import pytest
 
 from src.dataset_loader import DatasetLoader
+from src.exceptions import FileLoadError, ValidationError
 
 
 # Custom strategies for generating test data
@@ -142,7 +143,7 @@ def test_property_3_error_messages_include_context(invalid_path):
         img.save(valid_path)
         
         # Test with invalid reference path
-        with pytest.raises(FileNotFoundError) as exc_info:
+        with pytest.raises(FileLoadError) as exc_info:
             loader.load_image_pair(invalid_path, valid_path)
         
         error_message = str(exc_info.value)
@@ -151,7 +152,7 @@ def test_property_3_error_messages_include_context(invalid_path):
             f"Error message '{error_message}' doesn't contain file path or 'not found'"
         
         # Test with invalid distorted path
-        with pytest.raises(FileNotFoundError) as exc_info:
+        with pytest.raises(FileLoadError) as exc_info:
             loader.load_image_pair(valid_path, invalid_path)
         
         error_message = str(exc_info.value)

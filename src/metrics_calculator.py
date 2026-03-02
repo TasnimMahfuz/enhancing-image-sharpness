@@ -6,6 +6,7 @@ the quality of sharpened images against reference images.
 """
 
 import numpy as np
+from src.exceptions import ValidationError, NumericalError
 
 
 class MetricsCalculator:
@@ -28,9 +29,23 @@ class MetricsCalculator:
         Returns:
             Grayscale image with shape (H, W)
             
+        Raises:
+            ValidationError: If image format is invalid
+            NumericalError: If conversion produces non-finite values
+            
         Note:
             If the input is already grayscale (2D), it is returned unchanged.
         """
+        if not isinstance(image, np.ndarray):
+            raise ValidationError(
+                f"image must be a numpy array, got {type(image)}"
+            )
+        
+        if image.size == 0:
+            raise ValidationError(
+                "image is empty (size 0)"
+            )
+        
         if image.ndim == 2:
             # Already grayscale
             return image
@@ -40,9 +55,19 @@ class MetricsCalculator:
             G = image[:, :, 1]
             B = image[:, :, 2]
             gray = 0.299 * R + 0.587 * G + 0.114 * B
+            
+            # Check for non-finite values
+            if not np.all(np.isfinite(gray)):
+                nan_count = np.sum(np.isnan(gray))
+                inf_count = np.sum(np.isinf(gray))
+                raise NumericalError(
+                    f"Grayscale conversion produced non-finite values. "
+                    f"NaN count: {nan_count}, Inf count: {inf_count}"
+                )
+            
             return gray
         else:
-            raise ValueError(
+            raise ValidationError(
                 f"Image must be 2D (grayscale) or 3D with 3 channels (color), "
                 f"got shape {image.shape}"
             )
@@ -60,10 +85,48 @@ class MetricsCalculator:
         Returns:
             PLCC value in [-1, 1]
             
+        Raises:
+            ValidationError: If inputs are invalid or shapes don't match
+            NumericalError: If calculation produces non-finite values
+            
         Note:
             - Returns 0.0 for constant images (σ = 0)
             - Automatically converts color images to grayscale
         """
+        # Validate inputs
+        if not isinstance(sharpened, np.ndarray):
+            raise ValidationError(
+                f"sharpened must be a numpy array, got {type(sharpened)}"
+            )
+        
+        if not isinstance(reference, np.ndarray):
+            raise ValidationError(
+                f"reference must be a numpy array, got {type(reference)}"
+            )
+        
+        if sharpened.shape != reference.shape:
+            raise ValidationError(
+                f"Image shapes must match. "
+                f"Sharpened: {sharpened.shape}, Reference: {reference.shape}"
+            )
+        
+        # Check for non-finite values in inputs
+        if not np.all(np.isfinite(sharpened)):
+            nan_count = np.sum(np.isnan(sharpened))
+            inf_count = np.sum(np.isinf(sharpened))
+            raise NumericalError(
+                f"sharpened image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        if not np.all(np.isfinite(reference)):
+            nan_count = np.sum(np.isnan(reference))
+            inf_count = np.sum(np.isinf(reference))
+            raise NumericalError(
+                f"reference image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
         # Convert to grayscale if needed
         gray_sharpened = self._to_grayscale(sharpened)
         gray_reference = self._to_grayscale(reference)
@@ -86,6 +149,16 @@ class MetricsCalculator:
         
         plcc = numerator / denominator
         
+        # Check for non-finite result
+        if not np.isfinite(plcc):
+            raise NumericalError(
+                f"PLCC calculation produced non-finite value: {plcc}. "
+                f"Numerator: {numerator}, Denominator: {denominator}"
+            )
+        
+        # Clamp to valid range [-1, 1] (handle numerical precision issues)
+        plcc = np.clip(plcc, -1.0, 1.0)
+        
         return float(plcc)
     
     def calculate_srocc(self, sharpened: np.ndarray, reference: np.ndarray) -> float:
@@ -104,10 +177,48 @@ class MetricsCalculator:
         Returns:
             SROCC value in [-1, 1]
             
+        Raises:
+            ValidationError: If inputs are invalid or shapes don't match
+            NumericalError: If calculation produces non-finite values
+            
         Note:
             - More robust to non-linear relationships than PLCC
             - Automatically converts color images to grayscale
         """
+        # Validate inputs
+        if not isinstance(sharpened, np.ndarray):
+            raise ValidationError(
+                f"sharpened must be a numpy array, got {type(sharpened)}"
+            )
+        
+        if not isinstance(reference, np.ndarray):
+            raise ValidationError(
+                f"reference must be a numpy array, got {type(reference)}"
+            )
+        
+        if sharpened.shape != reference.shape:
+            raise ValidationError(
+                f"Image shapes must match. "
+                f"Sharpened: {sharpened.shape}, Reference: {reference.shape}"
+            )
+        
+        # Check for non-finite values in inputs
+        if not np.all(np.isfinite(sharpened)):
+            nan_count = np.sum(np.isnan(sharpened))
+            inf_count = np.sum(np.isinf(sharpened))
+            raise NumericalError(
+                f"sharpened image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        if not np.all(np.isfinite(reference)):
+            nan_count = np.sum(np.isnan(reference))
+            inf_count = np.sum(np.isinf(reference))
+            raise NumericalError(
+                f"reference image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
         # Convert to grayscale if needed
         gray_sharpened = self._to_grayscale(sharpened)
         gray_reference = self._to_grayscale(reference)
@@ -132,5 +243,15 @@ class MetricsCalculator:
             return 0.0
         
         srocc = numerator / denominator
+        
+        # Check for non-finite result
+        if not np.isfinite(srocc):
+            raise NumericalError(
+                f"SROCC calculation produced non-finite value: {srocc}. "
+                f"Numerator: {numerator}, Denominator: {denominator}"
+            )
+        
+        # Clamp to valid range [-1, 1] (handle numerical precision issues)
+        srocc = np.clip(srocc, -1.0, 1.0)
         
         return float(srocc)

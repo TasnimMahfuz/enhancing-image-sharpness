@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from .data_models import TestResult
+from .exceptions import ValidationError, FileLoadError, ProcessingError, NumericalError
 
 
 class ResultComparator:
@@ -29,12 +30,73 @@ class ResultComparator:
         - Labels with parameters (σ, t, λ)
         - PLCC and SROCC metrics
         - Highlighting for optimal result (t=0.6, λ=0)
+            
+        Raises:
+            ValidationError: If inputs are invalid
+            FileLoadError: If output file cannot be written
+            ProcessingError: If visualization generation fails
         """
-        if not results:
-            raise ValueError("No results provided for comparison")
+        # Validate inputs
+        if not isinstance(blurred, np.ndarray):
+            raise ValidationError(
+                f"blurred must be a numpy array, got {type(blurred)}"
+            )
         
-        # Convert blurred image to PIL format
-        blurred_pil = self._array_to_pil(blurred)
+        if blurred.size == 0:
+            raise ValidationError(
+                "blurred image is empty (size 0)"
+            )
+        
+        if not results:
+            raise ValidationError("No results provided for comparison")
+        
+        if not isinstance(results, list):
+            raise ValidationError(
+                f"results must be a list, got {type(results)}"
+            )
+        
+        # Check for non-finite values in blurred image
+        if not np.all(np.isfinite(blurred)):
+            nan_count = np.sum(np.isnan(blurred))
+            inf_count = np.sum(np.isinf(blurred))
+            raise NumericalError(
+                f"blurred image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        # Validate each result
+        for idx, result in enumerate(results):
+            if not isinstance(result, TestResult):
+                raise ValidationError(
+                    f"results[{idx}] must be a TestResult object, got {type(result)}"
+                )
+            
+            if not isinstance(result.sharpened_image, np.ndarray):
+                raise ValidationError(
+                    f"results[{idx}].sharpened_image must be a numpy array"
+                )
+            
+            if result.sharpened_image.size == 0:
+                raise ValidationError(
+                    f"results[{idx}].sharpened_image is empty (size 0)"
+                )
+            
+            # Check for non-finite values
+            if not np.all(np.isfinite(result.sharpened_image)):
+                nan_count = np.sum(np.isnan(result.sharpened_image))
+                inf_count = np.sum(np.isinf(result.sharpened_image))
+                raise NumericalError(
+                    f"results[{idx}].sharpened_image contains non-finite values. "
+                    f"NaN count: {nan_count}, Inf count: {inf_count}"
+                )
+        
+        try:
+            # Convert blurred image to PIL format
+            blurred_pil = self._array_to_pil(blurred)
+        except Exception as e:
+            raise ProcessingError(
+                f"Failed to convert blurred image to PIL format: {str(e)}"
+            )
         
         # Get dimensions
         img_height, img_width = blurred.shape[:2]
@@ -45,8 +107,13 @@ class ResultComparator:
         total_width = img_width * num_images
         total_height = img_height + label_height
         
-        # Create canvas
-        canvas = Image.new('RGB', (total_width, total_height), color='white')
+        try:
+            # Create canvas
+            canvas = Image.new('RGB', (total_width, total_height), color='white')
+        except Exception as e:
+            raise ProcessingError(
+                f"Failed to create canvas with size ({total_width}, {total_height}): {str(e)}"
+            )
         
         # Try to load a font, fall back to default if not available
         try:
@@ -56,41 +123,59 @@ class ResultComparator:
             font = ImageFont.load_default()
             font_bold = ImageFont.load_default()
         
-        draw = ImageDraw.Draw(canvas)
-        
-        # Place blurred image
-        canvas.paste(blurred_pil, (0, label_height))
-        
-        # Draw label for blurred image
-        label_text = "Blurred\n(Original)"
-        self._draw_label(draw, label_text, 0, 0, img_width, label_height, 
-                        font, is_optimal=False, border_color=None)
-        
-        # Place each result
-        for idx, result in enumerate(results):
-            x_offset = (idx + 1) * img_width
+        try:
+            draw = ImageDraw.Draw(canvas)
             
-            # Convert result image to PIL
-            result_pil = self._array_to_pil(result.sharpened_image)
-            canvas.paste(result_pil, (x_offset, label_height))
+            # Place blurred image
+            canvas.paste(blurred_pil, (0, label_height))
             
-            # Check if this is the optimal result (t=0.6, λ=0)
-            is_optimal = (abs(result.t - 0.6) < 0.01 and 
-                         abs(result.lambda_param - 0.0) < 0.01)
+            # Draw label for blurred image
+            label_text = "Blurred\n(Original)"
+            self._draw_label(draw, label_text, 0, 0, img_width, label_height, 
+                            font, is_optimal=False, border_color=None)
             
-            # Create label with parameters and metrics
-            label_text = (
-                f"σ={result.sigma:.1f}, t={result.t:.1f}, λ={result.lambda_param:.1f}\n"
-                f"PLCC={result.plcc:.4f}, SROCC={result.srocc:.4f}"
+            # Place each result
+            for idx, result in enumerate(results):
+                x_offset = (idx + 1) * img_width
+                
+                # Convert result image to PIL
+                try:
+                    result_pil = self._array_to_pil(result.sharpened_image)
+                except Exception as e:
+                    raise ProcessingError(
+                        f"Failed to convert result[{idx}] image to PIL format: {str(e)}"
+                    )
+                
+                canvas.paste(result_pil, (x_offset, label_height))
+                
+                # Check if this is the optimal result (t=0.6, λ=0)
+                is_optimal = (abs(result.t - 0.6) < 0.01 and 
+                             abs(result.lambda_param - 0.0) < 0.01)
+                
+                # Create label with parameters and metrics
+                label_text = (
+                    f"σ={result.sigma:.1f}, t={result.t:.1f}, λ={result.lambda_param:.1f}\n"
+                    f"PLCC={result.plcc:.4f}, SROCC={result.srocc:.4f}"
+                )
+                
+                # Highlight optimal result with green border
+                border_color = 'green' if is_optimal else None
+                self._draw_label(draw, label_text, x_offset, 0, img_width, 
+                               label_height, font, is_optimal, border_color)
+        except ProcessingError:
+            raise
+        except Exception as e:
+            raise ProcessingError(
+                f"Failed to generate comparison visualization: {str(e)}"
             )
-            
-            # Highlight optimal result with green border
-            border_color = 'green' if is_optimal else None
-            self._draw_label(draw, label_text, x_offset, 0, img_width, 
-                           label_height, font, is_optimal, border_color)
         
         # Save the comparison
-        canvas.save(output_path)
+        try:
+            canvas.save(output_path)
+        except Exception as e:
+            raise FileLoadError(
+                f"Failed to save comparison image to {output_path}: {str(e)}"
+            )
     
     def generate_metrics_table(self, results: List[TestResult]) -> str:
         """
@@ -102,11 +187,26 @@ class ResultComparator:
         Returns:
             Formatted string table with parameters and metrics
             
+        Raises:
+            ValidationError: If results list is invalid
+            
         The table includes columns: σ, t, λ, PLCC, SROCC
         Results are sorted by PLCC (descending)
         """
+        if not isinstance(results, list):
+            raise ValidationError(
+                f"results must be a list, got {type(results)}"
+            )
+        
         if not results:
             return "No results to display"
+        
+        # Validate each result
+        for idx, result in enumerate(results):
+            if not isinstance(result, TestResult):
+                raise ValidationError(
+                    f"results[{idx}] must be a TestResult object, got {type(result)}"
+                )
         
         # Sort by PLCC descending
         sorted_results = sorted(results, key=lambda r: r.plcc, reverse=True)
@@ -148,19 +248,50 @@ class ResultComparator:
             
         Returns:
             PIL Image
+            
+        Raises:
+            ValidationError: If image array is invalid
+            ProcessingError: If conversion fails
         """
-        # Ensure uint8 type
-        if img_array.dtype != np.uint8:
-            img_array = np.clip(img_array, 0, 255).astype(np.uint8)
+        if not isinstance(img_array, np.ndarray):
+            raise ValidationError(
+                f"img_array must be a numpy array, got {type(img_array)}"
+            )
         
-        # Handle grayscale
-        if img_array.ndim == 2:
-            return Image.fromarray(img_array, mode='L')
-        # Handle color
-        elif img_array.ndim == 3:
-            return Image.fromarray(img_array, mode='RGB')
-        else:
-            raise ValueError(f"Unsupported image dimensions: {img_array.ndim}")
+        if img_array.size == 0:
+            raise ValidationError(
+                "img_array is empty (size 0)"
+            )
+        
+        if img_array.ndim not in [2, 3]:
+            raise ValidationError(
+                f"Image must be 2D (grayscale) or 3D (color), got {img_array.ndim}D"
+            )
+        
+        # Check for non-finite values
+        if not np.all(np.isfinite(img_array)):
+            nan_count = np.sum(np.isnan(img_array))
+            inf_count = np.sum(np.isinf(img_array))
+            raise NumericalError(
+                f"img_array contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        try:
+            # Ensure uint8 type
+            if img_array.dtype != np.uint8:
+                img_array = np.clip(img_array, 0, 255).astype(np.uint8)
+            
+            # Handle grayscale
+            if img_array.ndim == 2:
+                return Image.fromarray(img_array, mode='L')
+            # Handle color
+            elif img_array.ndim == 3:
+                return Image.fromarray(img_array, mode='RGB')
+        except Exception as e:
+            raise ProcessingError(
+                f"Failed to convert numpy array to PIL Image: {str(e)}"
+            )
     
     def _draw_label(
         self,

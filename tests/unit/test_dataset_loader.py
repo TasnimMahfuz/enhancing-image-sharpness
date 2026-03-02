@@ -8,6 +8,7 @@ from PIL import Image
 import pytest
 
 from src.dataset_loader import DatasetLoader
+from src.exceptions import FileLoadError, ValidationError
 
 
 class TestDatasetLoader:
@@ -65,7 +66,7 @@ class TestDatasetLoader:
             dist_path = os.path.join(tmpdir, 'distorted.png')
             Image.fromarray(np.zeros((10, 10), dtype=np.uint8), mode='L').save(dist_path)
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_image_pair('/nonexistent/reference.png', dist_path)
             
             assert 'reference' in str(exc_info.value).lower()
@@ -79,7 +80,7 @@ class TestDatasetLoader:
             ref_path = os.path.join(tmpdir, 'reference.png')
             Image.fromarray(np.zeros((10, 10), dtype=np.uint8), mode='L').save(ref_path)
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_image_pair(ref_path, '/nonexistent/distorted.png')
             
             assert 'distorted' in str(exc_info.value).lower()
@@ -115,7 +116,7 @@ class TestDatasetLoader:
         """Test error handling for missing dataset path."""
         loader = DatasetLoader()
         
-        with pytest.raises(FileNotFoundError) as exc_info:
+        with pytest.raises(FileLoadError) as exc_info:
             loader.load_dataset('CSIQ', '/nonexistent/path')
         
         assert 'not found' in str(exc_info.value).lower()
@@ -171,7 +172,7 @@ class TestCSIQDataset:
             dst_dir = Path(tmpdir) / 'dst_imgs'
             dst_dir.mkdir()
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_csiq_dataset(tmpdir)
             
             assert 'src_imgs' in str(exc_info.value) or 'source' in str(exc_info.value).lower()
@@ -185,7 +186,7 @@ class TestCSIQDataset:
             src_dir = Path(tmpdir) / 'src_imgs'
             src_dir.mkdir()
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_csiq_dataset(tmpdir)
             
             assert 'dst_imgs' in str(exc_info.value) or 'distorted' in str(exc_info.value).lower()
@@ -238,7 +239,7 @@ class TestLIVEDataset:
         loader = DatasetLoader()
         
         with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_live_dataset(tmpdir)
             
             assert 'refimgs' in str(exc_info.value) or 'reference' in str(exc_info.value).lower()
@@ -312,7 +313,7 @@ class TestTID2013Dataset:
             dist_dir = Path(tmpdir) / 'distorted_images'
             dist_dir.mkdir()
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_tid2013_dataset(tmpdir)
             
             assert 'reference_images' in str(exc_info.value) or 'reference' in str(exc_info.value).lower()
@@ -326,7 +327,7 @@ class TestTID2013Dataset:
             ref_dir = Path(tmpdir) / 'reference_images'
             ref_dir.mkdir()
             
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_tid2013_dataset(tmpdir)
             
             assert 'distorted_images' in str(exc_info.value) or 'distorted' in str(exc_info.value).lower()
@@ -375,7 +376,7 @@ class TestKADID10kDataset:
         loader = DatasetLoader()
         
         with tempfile.TemporaryDirectory() as tmpdir:
-            with pytest.raises(FileNotFoundError) as exc_info:
+            with pytest.raises(FileLoadError) as exc_info:
                 loader.load_kadid10k_dataset(tmpdir)
             
             assert 'images' in str(exc_info.value).lower()

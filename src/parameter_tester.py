@@ -12,6 +12,7 @@ import logging
 
 from src.data_models import TestResult, ProcessingConfig
 from src.image_processor import ImageProcessor
+from src.exceptions import ValidationError, NumericalError
 
 
 # Set up logging
@@ -56,6 +57,9 @@ class ParameterTester:
         Returns:
             List of TestResult objects with metrics for each successful combination
             
+        Raises:
+            ValidationError: If inputs are invalid
+            
         Example:
             >>> tester = ParameterTester()
             >>> results = tester.test_parameters(
@@ -67,6 +71,62 @@ class ParameterTester:
             >>> len(results)  # Should be 3 * 2 * 2 = 12 if all succeed
             12
         """
+        # Validate inputs
+        if not isinstance(blurred, np.ndarray):
+            raise ValidationError(
+                f"blurred must be a numpy array, got {type(blurred)}"
+            )
+        
+        if not isinstance(reference, np.ndarray):
+            raise ValidationError(
+                f"reference must be a numpy array, got {type(reference)}"
+            )
+        
+        if blurred.size == 0:
+            raise ValidationError("blurred image is empty (size 0)")
+        
+        if reference.size == 0:
+            raise ValidationError("reference image is empty (size 0)")
+        
+        if blurred.shape != reference.shape:
+            raise ValidationError(
+                f"Image shapes must match. "
+                f"Blurred: {blurred.shape}, Reference: {reference.shape}"
+            )
+        
+        # Check for non-finite values
+        if not np.all(np.isfinite(blurred)):
+            nan_count = np.sum(np.isnan(blurred))
+            inf_count = np.sum(np.isinf(blurred))
+            raise NumericalError(
+                f"blurred image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        if not np.all(np.isfinite(reference)):
+            nan_count = np.sum(np.isnan(reference))
+            inf_count = np.sum(np.isinf(reference))
+            raise NumericalError(
+                f"reference image contains non-finite values. "
+                f"NaN count: {nan_count}, Inf count: {inf_count}"
+            )
+        
+        # Validate parameter lists
+        if not isinstance(t_values, list) or not t_values:
+            raise ValidationError(
+                f"t_values must be a non-empty list, got {type(t_values)}"
+            )
+        
+        if not isinstance(lambda_values, list) or not lambda_values:
+            raise ValidationError(
+                f"lambda_values must be a non-empty list, got {type(lambda_values)}"
+            )
+        
+        if not isinstance(sigma_values, list) or not sigma_values:
+            raise ValidationError(
+                f"sigma_values must be a non-empty list, got {type(sigma_values)}"
+            )
+        
         results = []
         total_combinations = len(t_values) * len(lambda_values) * len(sigma_values)
         
@@ -140,18 +200,28 @@ class ParameterTester:
             TestResult with highest metric value
             
         Raises:
-            ValueError: If results list is empty or metric is invalid
+            ValidationError: If results list is empty or metric is invalid
             
         Example:
             >>> optimal = tester.find_optimal(results, metric='plcc')
             >>> print(f"Best parameters: t={optimal.t}, λ={optimal.lambda_param}, σ={optimal.sigma}")
             >>> print(f"PLCC: {optimal.plcc:.4f}")
         """
+        if not isinstance(results, list):
+            raise ValidationError(
+                f"results must be a list, got {type(results)}"
+            )
+        
         if not results:
-            raise ValueError("Cannot find optimal parameters: results list is empty")
+            raise ValidationError("Cannot find optimal parameters: results list is empty")
+        
+        if not isinstance(metric, str):
+            raise ValidationError(
+                f"metric must be a string, got {type(metric)}"
+            )
         
         if metric not in ['plcc', 'srocc']:
-            raise ValueError(
+            raise ValidationError(
                 f"Invalid metric '{metric}'. Must be 'plcc' or 'srocc'"
             )
         
