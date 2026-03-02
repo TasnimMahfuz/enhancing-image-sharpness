@@ -209,3 +209,142 @@ class ImageProcessor:
         except Exception as e:
             # Catch any unexpected errors
             raise RuntimeError(f"Unexpected error during processing: {str(e)}")
+
+    def parse_config(self, config_dict: dict) -> ProcessingConfig:
+        """
+        Parse configuration dictionary to ProcessingConfig object.
+
+        Extracts and validates sigma, t, lambda, and omega parameters from
+        a dictionary or configuration file format.
+
+        Args:
+            config_dict: Dictionary containing configuration parameters.
+                        Expected keys: 'sigma', 't', 'lambda' (or 'lambda_param'), 'omega' (optional)
+
+        Returns:
+            ProcessingConfig object with validated parameters
+
+        Raises:
+            ValueError: If required parameters are missing or invalid
+
+        Examples:
+            >>> processor = ImageProcessor()
+            >>> config = processor.parse_config({'sigma': 1.0, 't': 0.6, 'lambda': 0.0})
+            >>> config.sigma
+            1.0
+        """
+        # Check for required parameters
+        if 'sigma' not in config_dict:
+            raise ValueError(
+                "Missing required parameter 'sigma'. "
+                "Valid range: σ > 0"
+            )
+
+        if 't' not in config_dict:
+            raise ValueError(
+                "Missing required parameter 't'. "
+                "Valid range: 0 ≤ t ≤ 1"
+            )
+
+        # Lambda can be specified as 'lambda' or 'lambda_param'
+        if 'lambda' in config_dict:
+            lambda_value = config_dict['lambda']
+        elif 'lambda_param' in config_dict:
+            lambda_value = config_dict['lambda_param']
+        else:
+            raise ValueError(
+                "Missing required parameter 'lambda' or 'lambda_param'. "
+                "Valid range: λ ∈ ℝ (any real number)"
+            )
+
+        # Omega is optional, defaults to 1.0
+        omega_value = config_dict.get('omega', 1.0)
+
+        # Extract values
+        try:
+            sigma = float(config_dict['sigma'])
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid value for 'sigma': {config_dict['sigma']}. "
+                f"Must be a positive number. Valid range: σ > 0"
+            )
+
+        try:
+            t = float(config_dict['t'])
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid value for 't': {config_dict['t']}. "
+                f"Must be a number in [0, 1]. Valid range: 0 ≤ t ≤ 1"
+            )
+
+        try:
+            lambda_param = float(lambda_value)
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid value for 'lambda': {lambda_value}. "
+                f"Must be a real number. Valid range: λ ∈ ℝ"
+            )
+
+        try:
+            omega = float(omega_value)
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Invalid value for 'omega': {omega_value}. "
+                f"Must be a positive number. Valid range: Ω > 0"
+            )
+
+        # Create config object (this will validate ranges)
+        try:
+            config = ProcessingConfig(
+                sigma=sigma,
+                t=t,
+                lambda_param=lambda_param,
+                omega=omega
+            )
+            # Validate the config
+            config.validate()
+            return config
+        except ValueError as e:
+            # Re-raise with original error message from validation
+            raise
+
+    def format_result(self, result: ProcessingResult) -> dict:
+        """
+        Format ProcessingResult as structured dictionary.
+
+        Converts a ProcessingResult object into a dictionary format suitable
+        for serialization (e.g., JSON) or easy inspection. The sharpened image
+        is kept as a numpy array for flexibility.
+
+        Args:
+            result: ProcessingResult object to format
+
+        Returns:
+            Dictionary with keys:
+                - 'sharpened_image': numpy array of sharpened image
+                - 'plcc': float, Pearson correlation coefficient
+                - 'srocc': float, Spearman correlation coefficient
+                - 'parameters': dict with sigma, t, lambda_param, omega
+                - 'processing_time': float, time in seconds
+
+        Examples:
+            >>> processor = ImageProcessor()
+            >>> # After processing...
+            >>> output = processor.format_result(result)
+            >>> output['plcc']
+            0.95
+            >>> output['parameters']['sigma']
+            1.0
+        """
+        return {
+            'sharpened_image': result.sharpened_image,
+            'plcc': result.plcc,
+            'srocc': result.srocc,
+            'parameters': {
+                'sigma': result.parameters.sigma,
+                't': result.parameters.t,
+                'lambda_param': result.parameters.lambda_param,
+                'omega': result.parameters.omega
+            },
+            'processing_time': result.processing_time
+        }
