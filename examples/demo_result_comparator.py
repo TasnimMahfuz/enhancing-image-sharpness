@@ -26,8 +26,8 @@ def demo_with_real_images():
     print("=" * 70)
     
     # Load real images from CSIQ dataset
-    reference_path = "datasets/CSIQ/src_imgs/1600.png"
-    blurred_path = "datasets/CSIQ/dst_imgs/blur/1600.BLUR.1.png"
+    reference_path = "datasets/CSIQ/src_imgs/boston.png"
+    blurred_path = "datasets/CSIQ/dst_imgs/blur/boston.BLUR.1.png"
     
     if not os.path.exists(reference_path) or not os.path.exists(blurred_path):
         print("ERROR: CSIQ dataset not found. Please ensure dataset is available.")
@@ -50,6 +50,10 @@ def demo_with_real_images():
         ProcessingConfig(sigma=1.0, t=0.3, lambda_param=0.0),
         ProcessingConfig(sigma=1.0, t=0.6, lambda_param=0.0),  # Optimal (paper's recommendation)
         ProcessingConfig(sigma=1.0, t=0.9, lambda_param=0.0),
+        # Additional lambda variations
+        ProcessingConfig(sigma=1.0, t=0.6, lambda_param=0.1),
+        ProcessingConfig(sigma=1.0, t=0.6, lambda_param=1.0),
+        ProcessingConfig(sigma=1.0, t=0.6, lambda_param=-0.1),
     ]
     
     results = []
