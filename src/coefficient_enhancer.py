@@ -15,8 +15,8 @@ class CoefficientEnhancer:
     Calculate and apply coefficient bounds for edge enhancement.
     
     This class implements the mathematical formulas from the paper:
-    - Equation 32: |a₂| ≤ (2λ / (1 + Ω)) * u₁
-    - Equation 34: |a₃| ≤ (λ / (1 + Ω)) * [u₁ + (λ / (1 + Ω)) * u₂]
+    - Equation 32: |a₂| ≤ √[3 / |2{3u₂² - 3u₃ - 6u₂(1+λ) + 9(1+2λ) + 7[2(1+λ)-u₂]²}|]
+    - Equation 34: |a₃| ≤ 1/(4[2(1+λ)-u₂]) + 1/(2[3(1+2λ)-u₃])
     
     Where u_n = (Ω^n - t^n) / (1 - t), with special handling for t=0.
     """
@@ -94,39 +94,52 @@ class CoefficientEnhancer:
         """
         Calculate |a₂| bound from Equation 32.
         
-        Formula: |a₂| ≤ (2λ / (1 + Ω)) * u₁
+        Formula: |a₂| ≤ √[3 / |2{3u₂² - 3u₃ - 6u₂(1+λ) + 9(1+2λ) + 7[2(1+λ)-u₂]²}|]
         
         Returns:
             |a₂| bound value
         """
-        u1 = self._calculate_u_n(1)
-        a2 = (2 * self.lambda_param / (1 + self.omega)) * u1
+        u2 = self._calculate_u_n(2)
+        u3 = self._calculate_u_n(3)
+        
+        denominator = 2 * (3*u2**2 - 3*u3 - 6*u2*(1 + self.lambda_param) + 
+                          9*(1 + 2*self.lambda_param) + 
+                          7*(2*(1 + self.lambda_param) - u2)**2)
+        
+        if abs(denominator) < 1e-10:
+            return 0.0
+        
+        a2 = np.sqrt(3 / abs(denominator))
         return abs(a2)
     
     def _calculate_a3(self) -> float:
         """
         Calculate |a₃| bound from Equation 34.
         
-        Formula: |a₃| ≤ (λ / (1 + Ω)) * [u₁ + (λ / (1 + Ω)) * u₂]
+        Formula: |a₃| ≤ 1/(4[2(1+λ)-u₂]) + 1/(2[3(1+2λ)-u₃])
         
         Returns:
             |a₃| bound value
         """
-        u1 = self._calculate_u_n(1)
         u2 = self._calculate_u_n(2)
+        u3 = self._calculate_u_n(3)
         
-        term1 = self.lambda_param / (1 + self.omega)
-        term2 = u1 + (self.lambda_param / (1 + self.omega)) * u2
-        a3 = term1 * term2
+        term1_denom = 4 * (2*(1 + self.lambda_param) - u2)
+        term2_denom = 2 * (3*(1 + 2*self.lambda_param) - u3)
         
+        term1 = 1 / term1_denom if abs(term1_denom) > 1e-10 else 0.0
+        term2 = 1 / term2_denom if abs(term2_denom) > 1e-10 else 0.0
+        
+        a3 = term1 + term2
         return abs(a3)
     
     def enhance(self, edge_image: np.ndarray) -> np.ndarray:
         """
         Apply coefficient bounds to enhance edge image.
         
-        Enhancement strategy: Use |a₂| as primary enhancement factor.
-        Scales the edge image by the calculated coefficient bound.
+        Enhancement strategy: Use both |a₂| and |a₃| coefficient bounds.
+        Scales the edge image by the combined coefficient bounds as per
+        the paper's methodology (Equations 32 and 34).
         
         Args:
             edge_image: Edge information from EdgeExtractor
@@ -149,8 +162,10 @@ class CoefficientEnhancer:
                 "edge_image is empty (size 0)"
             )
         
-        # Use a2_bound as primary enhancement factor
-        enhanced_edge = edge_image * self.a2_bound
+        # Use scaled average of both coefficient bounds 
+        enhanced_edge = edge_image * ((self.a2_bound + self.a3_bound) / 2) * 0.1
+
+
         
         # Check for numerical issues
         if not np.all(np.isfinite(enhanced_edge)):
@@ -159,7 +174,8 @@ class CoefficientEnhancer:
             raise NumericalError(
                 f"Enhancement produced non-finite values. "
                 f"NaN count: {nan_count}, Inf count: {inf_count}. "
-                f"a2_bound: {self.a2_bound}, edge_image range: [{np.min(edge_image)}, {np.max(edge_image)}]"
+                f"a2_bound: {self.a2_bound}, a3_bound: {self.a3_bound}, "
+                f"edge_image range: [{np.min(edge_image)}, {np.max(edge_image)}]"
             )
         
         return enhanced_edge
